@@ -131,7 +131,7 @@ do
         local ok, filePath = http.DownloadImage( url, headers ):SafeAwait()
         if not ok then return promise.Reject( filePath ) end
 
-        local cacheName = filePath .. ";" .. parameters
+        local cacheName = filePath .. ";" .. ( parameters or "" )
         local cachedMaterial = materialCache[ cacheName ]
         if cachedMaterial then return cachedMaterial end
 

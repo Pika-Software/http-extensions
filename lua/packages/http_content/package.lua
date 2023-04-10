@@ -1,3 +1,3 @@
 name = "HTTP Content"
 main = "init.lua"
-version = 1
+version = 2
