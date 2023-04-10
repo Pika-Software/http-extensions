@@ -9,7 +9,7 @@ local util = util
 local os_time = os.time
 local ipairs = ipairs
 
-local contentLifetime = CreateConVar( "http_content_lifetime", "24", FCVAR_ARCHIVE, " - ", 0, 1 ):GetInt() * 60 * 60
+local contentLifetime = CreateConVar( "http_content_lifetime", "24", FCVAR_ARCHIVE, " - file lifetime in hours, if the file exists more than the specified number of hours, it will be deleted/replaced.", 0, 1 ):GetInt() * 60 * 60
 cvars.AddChangeCallback( "http_content_lifetime", function( _, __, new )
     contentLifetime = ( tonumber( new ) or 1 ) * 60 * 60
 end, "gpm.http_content" )
@@ -36,7 +36,7 @@ function http.ClearCache( folder )
     end
 end
 
-if CreateConVar( "http_content_autoremove", "1", FCVAR_ARCHIVE, " - ", 0, 1 ):GetBool() then http.ClearCache() end
+if CreateConVar( "http_content_autoremove", "1", FCVAR_ARCHIVE, " - allow files that were downloaded a long time ago to be deleted automatically.", 0, 1 ):GetBool() then http.ClearCache() end
 cvars.AddChangeCallback( "http_content_autoremove", function( _, __, new )
     if new ~= "1" then return end
     http.ClearCache()
@@ -91,8 +91,9 @@ end
 
 http.DownloadContent = promise.Async( function( folder, url, headers )
     if not fs.IsDir( contentPath .. folder, "DATA" ) then fs.CreateDir( contentPath .. folder ) end
-    local extension = string.GetExtensionFromFilename( string.gsub( string.lower( url ), "[/\\]+$", "" ) )
-    local filePath = folder .. "/" .. util.SHA1( url ) .. "." .. extension
+
+    local fileName = string.gsub( string.lower( url ), "[/\\]+$", "" )
+    local filePath = folder .. "/" .. util.SHA1( fileName ) .. "." .. ( string.GetExtensionFromFilename( fileName ) or "dat" )
 
     local ok, result = http.Download( url, filePath, headers ):SafeAwait()
     if ok then
@@ -110,7 +111,7 @@ http.DownloadContent = promise.Async( function( folder, url, headers )
 end )
 
 http.DownloadAudio = promise.Async( function( url, parameters, headers )
-    local ok, result = http.DownloadContent( "audio", url, headers ):SafeAwait()
+    local ok, result = http.DownloadContent( "sounds/files", url, headers ):SafeAwait()
     if not ok then return promise.Reject( result ) end
     return result.filePath
 end )
