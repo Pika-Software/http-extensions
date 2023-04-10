@@ -1,0 +1,7 @@
+{
+    "name": "HTTP Content",
+    "files": {
+        "lua/packages/http_content/package.lua": "",
+        "lua/packages/http_content/init.lua": ""
+    }
+}
