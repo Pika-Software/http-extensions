@@ -44,33 +44,18 @@ end, "gpm.http_content" )
 
 do
 
-    -- local imageTypes = {
-    --     ["image/png"] = "png",
-    --     ["image/jpeg"] = "jpg"
-    -- }
-
-    -- if extension == nil then
-
-    -- elseif extension ~= realExt then
-
-    -- end
-
-
     local allowedExtensions = { "txt", "dat", "json", "xml", "csv", "jpg", "jpeg", "png", "vtf", "vmt", "mp3", "wav", "ogg" }
 
     http.Download = promise.Async( function( url, filePath, headers )
         filePath = string.lower( filePath )
 
-        local extension = string.GetExtensionFromFilename( url )
-        local allowed = false
-
+        local allowed, extension = false, string.GetExtensionFromFilename( filePath )
         for _, ext in ipairs( allowedExtensions ) do
             if ext ~= extension then continue end
             allowed = true
         end
 
         if not allowed then
-            -- string.gsub( filePath, "%." .. extension .. "$", "" )
             filePath = filePath .. ".dat"
         end
 
