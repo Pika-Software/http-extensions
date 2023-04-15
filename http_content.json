@@ -1,7 +1,0 @@
-{
-    "name": "HTTP Content",
-    "files": {
-        "lua/packages/http_content/package.lua": "https://raw.githubusercontent.com/Pika-Software/http_content_package/master/lua/packages/http_content/package.lua",
-        "lua/packages/http_content/init.lua": "https://raw.githubusercontent.com/Pika-Software/http_content_package/master/lua/packages/http_content/init.lua"
-    }
-}
