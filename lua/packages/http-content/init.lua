@@ -94,7 +94,7 @@ http.DownloadContent = promise.Async( function( folder, url, headers )
     if not fs.IsDir( contentPath .. folder, "DATA" ) then fs.CreateDir( contentPath .. folder ) end
 
     local fileName = string.gsub( string.lower( url ), "[/\\]+$", "" )
-    local filePath = folder .. "/" .. util.SHA1( fileName ) .. "." .. ( string.GetExtensionFromFilename( fileName ) or "dat" )
+    local filePath = folder .. "/" .. util.MD5( fileName ) .. "." .. ( string.GetExtensionFromFilename( fileName ) or "dat" )
 
     local ok, result = http.Download( url, filePath, headers ):SafeAwait()
     if ok then
@@ -177,7 +177,7 @@ do
             fs.CreateDir( contentPath .. "sounds" )
         end
 
-        local cachePath = contentPath .. "sounds/" .. util.SHA1( filePath ) .. ".gma.dat"
+        local cachePath = contentPath .. "sounds/" .. util.MD5( filePath ) .. ".gma.dat"
         if fs.Exists( cachePath, "DATA" ) and ( os_time() - fs.Time( filePath, "DATA" ) ) < contentLifetime then
             local ok, _ = game.MountGMA( cachePath )
             if ok then return string.sub( filePath, 7, #filePath ) end
