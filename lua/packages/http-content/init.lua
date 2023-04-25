@@ -1,7 +1,7 @@
 -- Libraries
 local promise = promise
 local gmad = gpm.gmad
-local fs = gpm.fs
+local file = file
 local http = http
 local util = util
 
@@ -16,7 +16,7 @@ cvars.AddChangeCallback( "http_content_lifetime", function( _, __, new )
 end, packageName )
 
 local contentPath = "gpm/" .. ( SERVER and "server" or "client" ) .. "/content/"
-fs.CreateDir( contentPath )
+file.CreateDir( contentPath )
 
 function http.ClearCache( folder )
     if not folder then
@@ -25,14 +25,14 @@ function http.ClearCache( folder )
         folder = folder .. "/"
     end
 
-    local files, folders = fs.Find( folder .. "*", "DATA" )
+    local files, folders = file.Find( folder .. "*", "DATA" )
     for _, folderName in ipairs( folders ) do
         http.ClearCache( folder .. folderName )
     end
 
     for _, fileName in ipairs( files ) do
-        if ( os_time() - fs.Time( folder .. fileName, "DATA" ) ) > contentLifetime then
-            fs.Delete( folder .. fileName )
+        if ( os_time() - file.Time( folder .. fileName, "DATA" ) ) > contentLifetime then
+            file.Delete( folder .. fileName )
         end
     end
 end
@@ -62,8 +62,8 @@ do
 
         filePath = contentPath .. filePath
 
-        if fs.Exists( filePath, "DATA" ) and ( os_time() - fs.Time( filePath, "DATA" ) ) < contentLifetime then
-            local ok, result = fs.AsyncRead( filePath, "DATA" ):SafeAwait()
+        if file.Exists( filePath, "DATA" ) and ( os_time() - file.Time( filePath, "DATA" ) ) < contentLifetime then
+            local ok, result = file.AsyncRead( filePath, "DATA" ):SafeAwait()
             if ok then
                 return {
                     ["filePath"] = filePath,
@@ -72,14 +72,14 @@ do
             end
         end
 
-        if fs.Exists( filePath, "DATA" ) then fs.Delete( filePath ) end
+        if file.Exists( filePath, "DATA" ) then file.Delete( filePath ) end
 
         local ok, result = http.Fetch( url, headers, 120 ):SafeAwait()
         if not ok then return promise.Reject( result ) end
 
         if result.code ~= 200 then return promise.Reject( "invalid response http code - " .. result.code ) end
 
-        local ok, err = fs.AsyncWrite( filePath, result.body ):SafeAwait()
+        local ok, err = file.AsyncWrite( filePath, result.body ):SafeAwait()
         if not ok then return promise.Reject( err ) end
 
         return {
@@ -91,7 +91,7 @@ do
 end
 
 http.DownloadContent = promise.Async( function( folder, url, headers )
-    if not fs.IsDir( contentPath .. folder, "DATA" ) then fs.CreateDir( contentPath .. folder ) end
+    if not file.IsDir( contentPath .. folder, "DATA" ) then file.CreateDir( contentPath .. folder ) end
 
     local fileName = string.gsub( string.lower( url ), "[/\\]+$", "" )
     local filePath = folder .. "/" .. util.MD5( fileName ) .. "." .. ( string.GetExtensionFromFilename( fileName ) or "dat" )
@@ -102,7 +102,7 @@ http.DownloadContent = promise.Async( function( folder, url, headers )
         return result
     end
 
-    local ok, content = fs.AsyncRead( filePath, "DATA" ):SafeAwait()
+    local ok, content = file.AsyncRead( filePath, "DATA" ):SafeAwait()
     if not ok then return promise.Reject( result ) end
 
     return {
@@ -171,19 +171,19 @@ do
 
         local fileName = string.GetFileFromFilename( filePath )
         local filePath = "sound/gpm/content/" .. fileName
-        if fs.Exists( filePath, "GAME" ) then return string.sub( filePath, 7, #filePath ) end
+        if file.Exists( filePath, "GAME" ) then return string.sub( filePath, 7, #filePath ) end
 
-        if not fs.IsDir( contentPath .. "sounds", "DATA" ) then
-            fs.CreateDir( contentPath .. "sounds" )
+        if not file.IsDir( contentPath .. "sounds", "DATA" ) then
+            file.CreateDir( contentPath .. "sounds" )
         end
 
         local cachePath = contentPath .. "sounds/" .. util.MD5( filePath ) .. ".gma.dat"
-        if fs.Exists( cachePath, "DATA" ) and ( os_time() - fs.Time( filePath, "DATA" ) ) < contentLifetime then
+        if file.Exists( cachePath, "DATA" ) and ( os_time() - file.Time( filePath, "DATA" ) ) < contentLifetime then
             local ok, _ = game.MountGMA( cachePath )
             if ok then return string.sub( filePath, 7, #filePath ) end
         end
 
-        if fs.Exists( cachePath, "DATA" ) then fs.Delete( cachePath ) end
+        if file.Exists( cachePath, "DATA" ) then file.Delete( cachePath ) end
 
         local ok, result = http.Fetch( url, headers, 120 ):SafeAwait()
         if not ok then return promise.Reject( result ) end
