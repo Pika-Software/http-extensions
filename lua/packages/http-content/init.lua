@@ -67,7 +67,7 @@ do
             if ok then
                 return {
                     ["filePath"] = filePath,
-                    ["content"] = result
+                    ["fileContent"] = result.fileContent
                 }
             end
         end
@@ -84,7 +84,7 @@ do
 
         return {
             ["filePath"] = filePath,
-            ["content"] = result.body
+            ["fileContent"] = result.body
         }
     end )
 
@@ -102,12 +102,12 @@ http.DownloadContent = promise.Async( function( folder, url, headers )
         return result
     end
 
-    local ok, content = file.AsyncRead( filePath, "DATA" ):SafeAwait()
+    local ok, result = file.AsyncRead( filePath, "DATA" ):SafeAwait()
     if not ok then return promise.Reject( result ) end
 
     return {
         ["filePath"] = "data/" .. filePath,
-        ["content"] = content
+        ["fileContent"] = result.fileContent
     }
 end )
 
