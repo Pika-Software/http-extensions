@@ -10,7 +10,7 @@ local packageName = gpm.Package:GetIdentifier()
 local os_time = os.time
 local ipairs = ipairs
 
-local contentLifetime = CreateConVar( "http_content_lifetime", "24", FCVAR_ARCHIVE, " - file lifetime in hours, if the file exists more than the specified number of hours, it will be deleted/replaced.", 0, 1 ):GetInt() * 60 * 60
+local contentLifetime = CreateConVar( "http_content_lifetime", "24", FCVAR_ARCHIVE, "File lifetime in hours, if the file exists more than the specified number of hours, it will be deleted/replaced.", 0, 1 ):GetInt() * 60 * 60
 cvars.AddChangeCallback( "http_content_lifetime", function( _, __, new )
     contentLifetime = ( tonumber( new ) or 1 ) * 60 * 60
 end, packageName )
@@ -37,7 +37,7 @@ function http.ClearCache( folder )
     end
 end
 
-if CreateConVar( "http_content_autoremove", "1", FCVAR_ARCHIVE, " - allow files that were downloaded a long time ago to be deleted automatically.", 0, 1 ):GetBool() then http.ClearCache() end
+if CreateConVar( "http_content_autoremove", "1", FCVAR_ARCHIVE, "Allow files that were downloaded a long time ago to be deleted automatically.", 0, 1 ):GetBool() then http.ClearCache() end
 cvars.AddChangeCallback( "http_content_autoremove", function( _, __, new )
     if new ~= "1" then return end
     http.ClearCache()
