@@ -1,3 +1,3 @@
 name = "http-content"
 main = "init.lua"
-version = 000101
+version = 010000
