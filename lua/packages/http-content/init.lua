@@ -1,6 +1,6 @@
 -- Libraries
 local promise = promise
-local gmad = gpm.gmad
+local gmad = gmad
 local file = file
 local http = http
 local util = util
