@@ -9,6 +9,7 @@ local util = util
 local packageName = gpm.Package:GetIdentifier()
 local os_time = os.time
 local ipairs = ipairs
+local select = select
 
 local contentLifetime = CreateConVar( "http_content_lifetime", "24", FCVAR_ARCHIVE, "File lifetime in hours, if the file exists more than the specified number of hours, it will be deleted/replaced.", 0, 1 ):GetInt() * 60 * 60
 cvars.AddChangeCallback( "http_content_lifetime", function( _, __, new )
@@ -77,7 +78,10 @@ do
         local ok, result = http.Fetch( url, headers, 120 ):SafeAwait()
         if not ok then return promise.Reject( result ) end
 
-        if result.code ~= 200 then return promise.Reject( "invalid response http code - " .. result.code ) end
+        local code = result.code
+        if code ~= 200 then
+            return promise.Reject( select( -1, http.GetStatusDescription( code ) ) )
+        end
 
         local ok, err = file.AsyncWrite( filePath, result.body ):SafeAwait()
         if not ok then return promise.Reject( err ) end
@@ -188,7 +192,11 @@ do
         local ok, result = http.Fetch( url, headers, 120 ):SafeAwait()
         if not ok then return promise.Reject( result ) end
 
-        if result.code ~= 200 then return promise.Reject( "invalid response http code - " .. result.code ) end
+        local code = result.code
+        if code ~= 200 then
+            return promise.Reject( select( -1, http.GetStatusDescription( code ) ) )
+        end
+
         if not allowedContentType[ result.headers["Content-Type"] ] then return promise.Reject( "invalid file content" ) end
 
         local gma = gmad.Write( cachePath )

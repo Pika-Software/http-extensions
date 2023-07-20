@@ -1,2 +1,2 @@
 name = "http-content"
-version = 010001
+version = "1.1.0"
