@@ -6,15 +6,14 @@ local http = http
 local util = util
 
 -- Variables
-local packageName = gpm.Package:GetIdentifier()
 local os_time = os.time
 local ipairs = ipairs
 local select = select
 
-local contentLifetime = CreateConVar( "http_content_lifetime", "24", FCVAR_ARCHIVE, "File lifetime in hours, if the file exists more than the specified number of hours, it will be deleted/replaced.", 0, 1 ):GetInt() * 60 * 60
+local contentLifetime = CreateConVar( "http_content_lifetime", "72", FCVAR_ARCHIVE, "File lifetime in hours, if the file exists more than the specified number of hours, it will be deleted/replaced.", 0, 1 ):GetInt() * 60 * 60
 cvars.AddChangeCallback( "http_content_lifetime", function( _, __, new )
     contentLifetime = ( tonumber( new ) or 1 ) * 60 * 60
-end, packageName )
+end )
 
 local contentPath = "gpm/" .. ( SERVER and "server" or "client" ) .. "/content/"
 file.CreateDir( contentPath )
@@ -42,7 +41,7 @@ if CreateConVar( "http_content_autoremove", "1", FCVAR_ARCHIVE, "Allow files tha
 cvars.AddChangeCallback( "http_content_autoremove", function( _, __, new )
     if new ~= "1" then return end
     http.ClearCache()
-end, packageName )
+end )
 
 do
 
