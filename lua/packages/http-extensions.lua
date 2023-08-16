@@ -63,13 +63,10 @@ do
         filePath = contentPath .. filePath
 
         if file.Exists( filePath, "DATA" ) and ( os_time() - file.Time( filePath, "DATA" ) ) < contentLifetime then
-            local ok, result = file.AsyncRead( filePath, "DATA" ):SafeAwait()
-            if ok then
-                return {
-                    ["filePath"] = filePath,
-                    ["fileContent"] = result.fileContent
-                }
-            end
+            return {
+                ["filePath"] = filePath,
+                ["content"] = file.Read( filePath, "DATA" )
+            }
         end
 
         if file.Exists( filePath, "DATA" ) then file.Delete( filePath ) end
@@ -82,22 +79,23 @@ do
             return promise.Reject( select( -1, http.GetStatusDescription( code ) ) )
         end
 
-        local ok, err = file.AsyncWrite( filePath, result.body ):SafeAwait()
+        local body = result.body
+        local ok, err = file.AsyncWrite( filePath, body ):SafeAwait()
         if not ok then return promise.Reject( err ) end
 
         return {
             ["filePath"] = filePath,
-            ["fileContent"] = result.body
+            ["content"] = body
         }
     end )
 
 end
 
-http.DownloadContent = promise.Async( function( folder, url, headers )
+http.DownloadContent = promise.Async( function( folder, url, extension, headers )
     if not file.IsDir( contentPath .. folder, "DATA" ) then file.CreateDir( contentPath .. folder ) end
 
     local fileName = string.gsub( string.lower( url ), "[/\\]+$", "" )
-    local filePath = folder .. "/" .. util.MD5( fileName ) .. "." .. ( string.GetExtensionFromFilename( fileName ) or "dat" )
+    local filePath = folder .. "/" .. util.MD5( fileName ) .. "." .. ( string.GetExtensionFromFilename( fileName ) or extension or "dat" )
 
     local ok, result = http.Download( url, filePath, headers ):SafeAwait()
     if ok then
@@ -110,18 +108,18 @@ http.DownloadContent = promise.Async( function( folder, url, headers )
 
     return {
         ["filePath"] = "data/" .. filePath,
-        ["fileContent"] = result.fileContent
+        ["content"] = result.content
     }
 end )
 
-http.DownloadAudio = promise.Async( function( url, parameters, headers )
-    local ok, result = http.DownloadContent( "sounds/files", url, headers ):SafeAwait()
+http.DownloadAudio = promise.Async( function( url, extension, headers )
+    local ok, result = http.DownloadContent( "sounds/files", url, extension or "mp3", headers ):SafeAwait()
     if not ok then return promise.Reject( result ) end
     return result.filePath
 end )
 
-http.DownloadImage = promise.Async( function( url, headers )
-    local ok, result = http.DownloadContent( "images", url, headers ):SafeAwait()
+http.DownloadImage = promise.Async( function( url, extension, headers )
+    local ok, result = http.DownloadContent( "images", url, extension or "png", headers ):SafeAwait()
     if not ok then return promise.Reject( result ) end
     return result.filePath
 end )
