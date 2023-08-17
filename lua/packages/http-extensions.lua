@@ -15,8 +15,7 @@ cvars.AddChangeCallback( "http_content_lifetime", function( _, __, new )
     contentLifetime = ( tonumber( new ) or 1 ) * 60 * 60
 end )
 
-local contentPath = "gpm/" .. ( SERVER and "server" or "client" ) .. "/content/"
-file.CreateDir( contentPath )
+local contentPath = file.CreateDir( "gpm/" .. ( SERVER and "server" or "client" ) .. "/content/" )
 
 function http.ClearCache( folder )
     if not folder then
