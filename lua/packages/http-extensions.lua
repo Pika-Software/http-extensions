@@ -15,7 +15,7 @@ cvars.AddChangeCallback( "http_content_lifetime", function( _, __, new )
     contentLifetime = ( tonumber( new ) or 1 ) * 60 * 60
 end )
 
-local contentPath = file.CreateDir( "gpm/" .. ( SERVER and "server" or "client" ) .. "/content/" )
+local contentPath = file.CreateDir( "downloads/" .. ( SERVER and "server" or "client" ) .. "/" )
 
 function http.ClearCache( folder )
     if not folder then
@@ -168,7 +168,7 @@ do
         if not extension then return promise.Reject( "invalid link" ) end
 
         local fileName = string.GetFileFromFilename( filePath )
-        local filePath = "sound/gpm/content/" .. fileName
+        local filePath = "sound/downloads/" .. fileName
         if file.Exists( filePath, "GAME" ) then return string.sub( filePath, 7, #filePath ) end
 
         if not file.IsDir( contentPath .. "sounds", "DATA" ) then
