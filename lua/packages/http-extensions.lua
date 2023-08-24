@@ -3,9 +3,9 @@ local promise = promise
 local gmad = gmad
 local file = file
 local http = http
-local util = util
 
 -- Variables
+local util_Base64Encode = util.Base64Encode
 local os_time = os.time
 local ipairs = ipairs
 local select = select
@@ -93,9 +93,7 @@ end
 http.DownloadContent = promise.Async( function( folder, url, extension, headers )
     if not file.IsDir( contentPath .. folder, "DATA" ) then file.CreateDir( contentPath .. folder ) end
 
-    local fileName = string.gsub( string.lower( url ), "[/\\]+$", "" )
-    local filePath = folder .. "/" .. util.MD5( fileName ) .. "." .. ( string.GetExtensionFromFilename( fileName ) or extension or "dat" )
-
+    local filePath = folder .. "/" .. util_Base64Encode( url ) .. "." .. ( string.match( url, ".-%.(%w+)$" ) or extension or "dat" )
     local ok, result = http.Download( url, filePath, headers ):SafeAwait()
     if ok then
         result.filePath = "data/" .. result.filePath
@@ -177,7 +175,7 @@ do
             file.CreateDir( contentPath .. "sounds" )
         end
 
-        local cachePath = contentPath .. "sounds/" .. util.MD5( filePath ) .. ".gma.dat"
+        local cachePath = contentPath .. "sounds/" .. util_Base64Encode( filePath ) .. ".gma.dat"
         if file.Exists( cachePath, "DATA" ) and ( os_time() - file.Time( filePath, "DATA" ) ) < contentLifetime then
             local ok, _ = game.MountGMA( cachePath )
             if ok then return string.sub( filePath, 7, #filePath ) end
