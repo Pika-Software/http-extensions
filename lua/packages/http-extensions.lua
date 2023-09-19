@@ -79,8 +79,8 @@ do
         end
 
         local body = result.body
-        local ok, err = file.AsyncWrite( filePath, body ):SafeAwait()
-        if not ok then return promise.Reject( err ) end
+        ok, result = file.AsyncWrite( filePath, body ):SafeAwait()
+        if not ok then return promise.Reject( result ) end
 
         return {
             ["filePath"] = filePath,
@@ -100,7 +100,7 @@ http.DownloadContent = promise.Async( function( folder, url, extension, headers 
         return result
     end
 
-    local ok, result = file.AsyncRead( filePath, "DATA" ):SafeAwait()
+    ok, result = file.AsyncRead( filePath, "DATA" ):SafeAwait()
     if not ok then return promise.Reject( result ) end
 
     return {
@@ -168,7 +168,8 @@ do
         if not extension then return promise.Reject( "invalid link" ) end
 
         local fileName = string.GetFileFromFilename( filePath )
-        local filePath = "sound/downloads/" .. fileName
+        filePath = "sound/downloads/" .. fileName
+
         if file.Exists( filePath, "GAME" ) then return string.sub( filePath, 7, #filePath ) end
 
         if not file.IsDir( contentPath .. "sounds", "DATA" ) then
@@ -200,8 +201,9 @@ do
         gma:AddFile( filePath, result.body )
         gma:Close()
 
-        local ok, _ = game.MountGMA( "data/" .. cachePath )
-        if ok then return string.sub( filePath, 7, #filePath ) end
+        if game.MountGMA( "data/" .. cachePath ) then
+            return string.sub( filePath, 7, #filePath )
+        end
 
         return promise.Reject( "assembly failed" )
     end )
